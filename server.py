@@ -23,6 +23,19 @@ def LandingPage():
     
     return render_template('landingpage.html', image=url_for('static', filename='images/image.png'))
 
+@app.route('/protected')
+def Protected():
+
+    try:
+
+        Referer = request.headers.get("Referer")
+    
+    except:
+
+        pass
+
+    return f'You have been redirected to olyiums protected network to ensure the stability and uptime of {Referer}'
+
 @app.errorhandler(Exception)
 def handle_all_errors(e):
     return redirect(url_for('LandingPage'))
