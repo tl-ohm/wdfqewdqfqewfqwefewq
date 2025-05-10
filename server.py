@@ -24,7 +24,7 @@ def LandingPage():
     return render_template('landingpage.html', image=url_for('static', filename='images/image.png'))
 
 @app.route('/ansi', methods=['POST', 'GET'])
-def LandingPage():
+def ansi():
 
     maintenance_message = check_maintenance()
     
