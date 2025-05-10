@@ -23,6 +23,19 @@ def LandingPage():
     
     return render_template('landingpage.html', image=url_for('static', filename='images/image.png'))
 
+@app.route('/ansi', methods=['POST', 'GET'])
+def LandingPage():
+
+    maintenance_message = check_maintenance()
+    
+    if maintenance_message:
+        return maintenance_message
+
+    if request.method == "POST":
+        return 'fuck you'
+    
+    return render_template('ansi.html', image=url_for('static', filename='images/image.png'))
+
 @app.route('/protected')
 def Protected():
 
