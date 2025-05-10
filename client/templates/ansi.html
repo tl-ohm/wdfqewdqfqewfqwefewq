@@ -555,188 +555,238 @@
     </div>
     
     <script>
-        // Configuration
-        const palette = ['#252525', 'orange', 'white', 'black'];
-        const codes = ['B', 'O', 'w', 'B'];
-        let cols = 16;
-        let rows = 16;
-        let drawing = false;
-        let colorIndex = 1;
-        let pixelSize = 25;
-        
-        // Undo/Redo history
-        const maxHistory = 50;
-        let history = [];
-        let historyIndex = -1;
-        
-        // DOM Elements
-        const gridEl = document.getElementById('grid');
-        const outEl = document.getElementById('output');
-        const pw = document.getElementById('width');
-        const ph = document.getElementById('height');
-        const pixelSizeEl = document.getElementById('pixel-size');
-        const pixelSizeValueEl = document.getElementById('pixel-size-value');
-        const helpModal = document.getElementById('help-modal');
-        
-        // Event Listeners
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-                colorIndex = +option.dataset.color;
-            });
+    // Configuration
+    const palette = ['#252525', 'orange', 'white', 'black'];
+    const codes = ['B', 'O', 'w', 'B'];
+    let cols = 16;
+    let rows = 16;
+    let drawing = false;
+    let colorIndex = 1;
+    let pixelSize = 25;
+    
+    // Undo/Redo history
+    const maxHistory = 50;
+    let history = [];
+    let historyIndex = -1;
+    let isPainting = false;
+    let initialPaintState = [];
+    
+    // DOM Elements
+    const gridEl = document.getElementById('grid');
+    const outEl = document.getElementById('output');
+    const pw = document.getElementById('width');
+    const ph = document.getElementById('height');
+    const pixelSizeEl = document.getElementById('pixel-size');
+    const pixelSizeValueEl = document.getElementById('pixel-size-value');
+    const helpModal = document.getElementById('help-modal');
+    
+    // Event Listeners
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            colorIndex = +option.dataset.color;
         });
+    });
+    
+    document.getElementById('clear').addEventListener('click', clear);
+    document.getElementById('resize').addEventListener('click', () => {
+        const newWidth = +pw.value || 1;
+        const newHeight = +ph.value || 1;
         
-        document.getElementById('clear').addEventListener('click', clear);
-        document.getElementById('resize').addEventListener('click', () => {
-            const newWidth = +pw.value || 1;
-            const newHeight = +ph.value || 1;
-            
-            // Limit to reasonable values
-            cols = Math.min(Math.max(newWidth, 1), 64);
-            rows = Math.min(Math.max(newHeight, 1), 64);
-            
-            // Update input values to reflect actual values
-            pw.value = cols;
-            ph.value = rows;
-            
-            initGrid();
-        });
+        cols = Math.min(Math.max(newWidth, 1), 64);
+        rows = Math.min(Math.max(newHeight, 1), 64);
         
-        document.getElementById('copy-output').addEventListener('click', () => {
-            outEl.select();
-            document.execCommand('copy');
-            
-            // Show feedback
-            const originalText = document.getElementById('copy-output').textContent;
-            document.getElementById('copy-output').textContent = 'Copied!';
-            setTimeout(() => {
-                document.getElementById('copy-output').textContent = originalText;
-            }, 1500);
-        });
+        pw.value = cols;
+        ph.value = rows;
         
-        pixelSizeEl.addEventListener('input', (e) => {
-            pixelSize = +e.target.value;
-            pixelSizeValueEl.textContent = `${pixelSize}px`;
-            updateGridCellSize();
-        });
-        
-        document.getElementById('help-button').addEventListener('click', () => {
-            helpModal.style.display = 'flex';
-        });
-        
-        document.querySelector('.close-modal').addEventListener('click', () => {
+        initGrid();
+        saveStateToHistory(getGridState());
+    });
+    
+    document.getElementById('copy-output').addEventListener('click', () => {
+        outEl.select();
+        document.execCommand('copy');
+        const originalText = document.getElementById('copy-output').textContent;
+        document.getElementById('copy-output').textContent = 'Copied!';
+        setTimeout(() => {
+            document.getElementById('copy-output').textContent = originalText;
+        }, 1500);
+    });
+    
+    pixelSizeEl.addEventListener('input', (e) => {
+        pixelSize = +e.target.value;
+        pixelSizeValueEl.textContent = `${pixelSize}px`;
+        updateGridCellSize();
+    });
+    
+    document.getElementById('help-button').addEventListener('click', () => {
+        helpModal.style.display = 'flex';
+    });
+    
+    document.querySelector('.close-modal').addEventListener('click', () => {
+        helpModal.style.display = 'none';
+    });
+    
+    window.addEventListener('click', (e) => {
+        if (e.target === helpModal) {
             helpModal.style.display = 'none';
-        });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', (e) => {
-            if (e.target === helpModal) {
-                helpModal.style.display = 'none';
-            }
-        });
-        
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Clear canvas with 'c' key
-            if (e.key.toLowerCase() === 'c' && !e.ctrlKey) {
-                clear();
-            }
-            
-            // Copy output with Ctrl+C when output is focused
-            if (e.key.toLowerCase() === 'c' && e.ctrlKey && document.activeElement !== outEl) {
-                e.preventDefault();
-                document.getElementById('copy-output').click();
-            }
-            
-            // Undo with Ctrl+Z
-            if (e.key.toLowerCase() === 'z' && e.ctrlKey) {
-                e.preventDefault();
-                undo();
-            }
-            
-            // Redo with Ctrl+Y or Ctrl+Shift+Z
-            if ((e.key.toLowerCase() === 'y' && e.ctrlKey) || 
-                (e.key.toLowerCase() === 'z' && e.ctrlKey && e.shiftKey)) {
-                e.preventDefault();
-                redo();
-            }
-        });
-        
-        // Functions
-        function initGrid() {
-            gridEl.innerHTML = '';
-            gridEl.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
-            gridEl.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
-            
-            for (let y = 0; y < rows; y++) {
-                for (let x = 0; x < cols; x++) {
-                    const c = document.createElement('div');
-                    c.classList.add('cell');
-                    c.dataset.x = x;
-                    c.dataset.y = y;
-                    c.dataset.val = 0;
-                    c.style.width = `${pixelSize}px`;
-                    c.style.height = `${pixelSize}px`;
-                    c.style.backgroundColor = palette[0];
-                    
-                    c.addEventListener('mousedown', paint);
-                    c.addEventListener('mouseover', e => drawing && paint(e));
-                    
-                    gridEl.append(c);
-                }
-            }
-            
-            generate();
         }
+    });
+    
+    // Undo/Redo Event Listeners
+    document.getElementById('undo').addEventListener('click', undo);
+    document.getElementById('redo').addEventListener('click', redo);
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'c' && !e.ctrlKey) {
+            clear();
+        }
+        if (e.key.toLowerCase() === 'c' && e.ctrlKey && document.activeElement !== outEl) {
+            e.preventDefault();
+            document.getElementById('copy-output').click();
+        }
+        if (e.key.toLowerCase() === 'z' && e.ctrlKey) {
+            e.preventDefault();
+            undo();
+        }
+        if ((e.key.toLowerCase() === 'y' && e.ctrlKey) || 
+            (e.key.toLowerCase() === 'z' && e.ctrlKey && e.shiftKey)) {
+            e.preventDefault();
+            redo();
+        }
+    });
+    
+    // Grid Painting State Tracking
+    gridEl.addEventListener('mousedown', (e) => {
+        if (e.target.classList.contains('cell')) {
+            isPainting = true;
+            initialPaintState = getGridState();
+        }
+    });
+    
+    document.body.addEventListener('mouseup', () => {
+        if (isPainting) {
+            isPainting = false;
+            const finalPaintState = getGridState();
+            if (JSON.stringify(initialPaintState) !== JSON.stringify(finalPaintState)) {
+                saveStateToHistory(finalPaintState);
+            }
+        }
+    });
+    
+    // Functions
+    function getGridState() {
+        return Array.from(document.querySelectorAll('.cell')).map(cell => cell.dataset.val);
+    }
+    
+    function saveStateToHistory(state) {
+        if (historyIndex < history.length - 1) {
+            history = history.slice(0, historyIndex + 1);
+        }
+        history.push(state);
+        historyIndex++;
+        if (history.length > maxHistory) {
+            history.shift();
+            historyIndex--;
+        }
+    }
+    
+    function applyState(state) {
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach((cell, index) => {
+            const val = state[index];
+            cell.dataset.val = val;
+            cell.style.backgroundColor = palette[val];
+        });
+        generate();
+    }
+    
+    function undo() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            applyState(history[historyIndex]);
+        }
+    }
+    
+    function redo() {
+        if (historyIndex < history.length - 1) {
+            historyIndex++;
+            applyState(history[historyIndex]);
+        }
+    }
+    
+    function initGrid() {
+        gridEl.innerHTML = '';
+        gridEl.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
+        gridEl.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
         
-        function updateGridCellSize() {
-            gridEl.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
-            gridEl.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
-            
-            document.querySelectorAll('.cell').forEach(c => {
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                const c = document.createElement('div');
+                c.classList.add('cell');
+                c.dataset.x = x;
+                c.dataset.y = y;
+                c.dataset.val = 0;
                 c.style.width = `${pixelSize}px`;
                 c.style.height = `${pixelSize}px`;
-            });
-        }
-        
-        function paint(e) {
-            const c = e.currentTarget;
-            c.dataset.val = colorIndex;
-            c.style.backgroundColor = palette[colorIndex];
-            generate();
-        }
-        
-        function clear() {
-            document.querySelectorAll('.cell').forEach(c => {
-                c.dataset.val = 0;
                 c.style.backgroundColor = palette[0];
-            });
-            generate();
-        }
-        
-        function generate() {
-            let s = '';
-            const cells = Array.from(document.querySelectorAll('.cell'));
-            
-            for (let y = 0; y < rows; y++) {
-                for (let x = 0; x < cols; x++) {
-                    const c = cells[y * cols + x];
-                    s += codes[+c.dataset.val];
-                }
-                if (y < rows - 1) s += 'n';
+                
+                c.addEventListener('mousedown', paint);
+                c.addEventListener('mouseover', e => drawing && paint(e));
+                
+                gridEl.append(c);
             }
-            
-            outEl.value = s;
         }
         
-        // Global mouse events
-        document.body.addEventListener('mousedown', () => drawing = true);
-        document.body.addEventListener('mouseup', () => drawing = false);
-        document.body.addEventListener('mouseleave', () => drawing = false);
-        
-        // Initialize the grid
-        initGrid();
-    </script>
+        generate();
+    }
+    
+    function updateGridCellSize() {
+        gridEl.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
+        gridEl.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
+        document.querySelectorAll('.cell').forEach(c => {
+            c.style.width = `${pixelSize}px`;
+            c.style.height = `${pixelSize}px`;
+        });
+    }
+    
+    function paint(e) {
+        const c = e.currentTarget;
+        c.dataset.val = colorIndex;
+        c.style.backgroundColor = palette[colorIndex];
+        generate();
+    }
+    
+    function clear() {
+        document.querySelectorAll('.cell').forEach(c => {
+            c.dataset.val = 0;
+            c.style.backgroundColor = palette[0];
+        });
+        generate();
+    }
+    
+    function generate() {
+        let s = '';
+        const cells = Array.from(document.querySelectorAll('.cell'));
+        for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+                const c = cells[y * cols + x];
+                s += codes[+c.dataset.val];
+            }
+            if (y < rows - 1) s += 'n';
+        }
+        outEl.value = s;
+    }
+    
+    // Global mouse events
+    document.body.addEventListener('mousedown', () => drawing = true);
+    document.body.addEventListener('mouseup', () => drawing = false);
+    document.body.addEventListener('mouseleave', () => drawing = false);
+    
+    // Initialize the grid and history
+    initGrid();
+    saveStateToHistory(getGridState());
+</script>
 </body>
 </html>
