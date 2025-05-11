@@ -3,11 +3,11 @@ from flask import Flask, render_template, redirect, url_for, request, jsonify, a
 
 app = Flask(__name__, template_folder="client/templates", static_folder="client/static")
 
-maintenance_mode = False
+maintenance_mode = True
 
 def check_maintenance():
     if maintenance_mode:
-        return 'olyium is down.'
+        return 'olyium is 100% down rn. (jokeing ts is still up)'
     return None
 
 @app.route('/', methods=['POST', 'GET'])
