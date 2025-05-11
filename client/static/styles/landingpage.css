@@ -35,7 +35,6 @@
         
         .header {
             padding: 50px 20px;
-            background: linear-gradient(135deg, rgba(50, 50, 50, 0.3), rgba(0, 0, 0, 0.6));
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             margin-bottom: 40px;
