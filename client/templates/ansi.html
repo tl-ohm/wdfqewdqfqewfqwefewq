@@ -1,792 +1,1393 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <meta name="description" content="skibidi ansi editor">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Pixel to ANSI Studio - Create and convert pixel art to ANSI codes" />
 
-    <title>Pixel to ANSI Studio</title>
-    <style>
-        :root {
-            --bg-primary: #121212;
-            --bg-secondary: #1e1e1e;
-            --text-primary: #f5f5f5;
-            --text-secondary: #a0a0a0;
-            --accent-color: #6366f1;
-            --accent-hover: #818cf8;
-            --grid-bg: #252525;
-            --grid-border: #333;
-            --panel-bg: #252525;
-            --panel-border: #333;
-            --button-bg: #2d2d2d;
-            --button-hover: #3d3d3d;
-            --slider-bg: #3d3d3d;
-            --modal-bg: rgba(0, 0, 0, 0.8);
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            line-height: 1.5;
-        }
-        
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .title {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-        
-        .subheading {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: -5px;
-        }
+        <title>Pixel to ANSI Studio</title>
+        <style>
+            :root {
+                --bg-primary: #080808;
+                --bg-secondary: #0f0f0f;
+                --text-primary: #f5f5f5;
+                --text-secondary: #a0a0a0;
+                --accent-color: #ff9800;
+                --accent-hover: #ffb74d;
+                --grid-bg: #121212;
+                --grid-border: #222;
+                --panel-bg: #151515;
+                --panel-border: #222;
+                --button-bg: #1c1c1c;
+                --button-hover: #292929;
+                --slider-bg: #2a2a2a;
+                --modal-bg: rgba(0, 0, 0, 0.85);
+                --success: #26a69a;
+                --warning: #f57c00;
+            }
 
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        @media (min-width: 768px) {
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                background-color: var(--bg-primary);
+                color: var(--text-primary);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                line-height: 1.5;
+            }
+
+            .container {
+                max-width: 1200px;
+                width: 100%;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                height: calc(100vh - 60px);
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0;
+            }
+
+            .title {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: var(--accent-color);
+            }
+
+            .subheading {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                margin-top: -5px;
+            }
+
             .main-content {
-                flex-direction: row;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                flex: 1;
+                height: calc(100% - 60px);
             }
-        }
-        
-        .toolbox {
-            background-color: var(--panel-bg);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-            border: 1px solid var(--panel-border);
-        }
-        
-        @media (min-width: 768px) {
+
+            @media (min-width: 768px) {
+                .main-content {
+                    flex-direction: row;
+                }
+            }
+
             .toolbox {
-                width: 250px;
-                flex-shrink: 0;
+                background-color: var(--panel-bg);
+                border-radius: 8px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                width: 100%;
+                border: 1px solid var(--panel-border);
+                overflow-y: auto;
             }
-        }
-        
-        .toolbox-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .toolbox-section-title {
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-        }
-        
-        .control-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .control-group-stacked {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        label {
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        input[type="number"] {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--panel-border);
-            color: var(--text-primary);
-            padding: 6px 8px;
-            border-radius: 4px;
-            width: 60px;
-            font-size: 0.9rem;
-        }
-        
-        button {
-            background-color: var(--button-bg);
-            color: var(--text-primary);
-            border: none;
-            border-radius: 4px;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        button:hover {
-            background-color: var(--button-hover);
-        }
-        
-        button.primary {
-            background-color: var(--accent-color);
-        }
-        
-        button.primary:hover {
-            background-color: var(--accent-hover);
-        }
-        
-        button.icon-button {
-            padding: 6px;
-            border-radius: 4px;
-        }
-        
-        .color-palette {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-        
-        .color-option {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 4px;
-            cursor: pointer;
-            position: relative;
-            transition: transform 0.1s ease;
-            border: 2px solid transparent;
-        }
-        
-        .color-option:hover {
-            transform: scale(1.05);
-        }
-        
-        .color-option.selected {
-            border-color: var(--accent-color);
-        }
-        
-        select {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--panel-border);
-            color: var(--text-primary);
-            padding: 6px 8px;
-            border-radius: 4px;
-            width: 100%;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-        
-        .workspace {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        
-        .grid-container {
-            background-color: var(--panel-bg);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: auto;
-            position: relative;
-            min-height: 400px;
-            border: 1px solid var(--panel-border);
-        }
-        
-        .grid-wrapper {
-            overflow: auto;
-            max-width: 100%;
-            max-height: 100%;
-        }
-        
-        #grid {
-            display: grid;
-            gap: 1px;
-            background-color: var(--grid-border);
-            border: 1px solid var(--grid-border);
-            user-select: none;
-            margin: 0 auto;
-        }
-        
-        .cell {
-            width: 25px;
-            height: 25px;
-            background-color: var(--grid-bg);
-            cursor: pointer;
-            transition: background-color 0.1s ease;
-            position: relative;
-        }
-        
-        .cell:hover::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-        }
-        
-        .output-container {
-            background-color: var(--panel-bg);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border: 1px solid var(--panel-border);
-        }
-        
-        .output-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        #output {
-            width: 100%;
-            height: 100px;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--panel-border);
-            border-radius: 4px;
-            color: var(--text-primary);
-            padding: 10px;
-            font-family: monospace;
-            resize: vertical;
-        }
-        
-        .tools-row {
-            display: flex;
-            gap: 10px;
-        }
 
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            width: 100%;
-        }
-        
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            background-color: var(--slider-bg);
-            border-radius: 3px;
-            outline: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .tooltip .tooltip-text {
-            visibility: hidden;
-            width: 120px;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            text-align: center;
-            border-radius: 4px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.2s;
-            font-size: 0.8rem;
-            pointer-events: none;
-        }
-        
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
+            @media (min-width: 768px) {
+                .toolbox {
+                    width: 280px;
+                    flex-shrink: 0;
+                }
+            }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--modal-bg);
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        
-        .modal-content {
-            background-color: var(--panel-bg);
-            border-radius: 8px;
-            padding: 20px;
-            width: 300px;
-            max-width: 90%;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-        }
-        
-        .close-modal:hover {
-            color: var(--text-primary);
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-        }
+            .toolbox-section {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
 
-        .keyboard-shortcuts {
-            margin-top: 10px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
+            .toolbox-section-title {
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--text-secondary);
+                margin-bottom: 5px;
+            }
 
-        .shortcut {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
+            .control-group {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
 
-        .key {
-            background-color: var(--button-bg);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1 class="title">Pixel to ANSI Studio</h1>
-                <p class="subheading">Create pixel art and export to ANSI</p>
+            .control-group-stacked {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            label {
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            input[type="number"],
+            input[type="text"] {
+                background-color: var(--bg-secondary);
+                border: 1px solid var(--panel-border);
+                color: var(--text-primary);
+                padding: 6px 8px;
+                border-radius: 4px;
+                width: 60px;
+                font-size: 0.9rem;
+            }
+
+            input[type="text"] {
+                width: 100%;
+            }
+
+            button {
+                background-color: var(--button-bg);
+                color: var(--text-primary);
+                border: none;
+                border-radius: 4px;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+
+            button:hover {
+                background-color: var(--button-hover);
+            }
+
+            button.primary {
+                background-color: var(--accent-color);
+                color: #000;
+                font-weight: 500;
+            }
+
+            button.primary:hover {
+                background-color: var(--accent-hover);
+            }
+
+            button.tool-button {
+                padding: 8px;
+                border-radius: 4px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            button.icon-button {
+                padding: 6px;
+                border-radius: 4px;
+            }
+
+            button.active {
+                background-color: var(--accent-color);
+                color: #000;
+            }
+
+            .color-palette {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .color-option {
+                width: 100%;
+                aspect-ratio: 1;
+                border-radius: 4px;
+                cursor: pointer;
+                position: relative;
+                transition: transform 0.1s ease;
+                border: 2px solid transparent;
+            }
+
+            .color-option:hover {
+                transform: scale(1.05);
+            }
+
+            .color-option.selected {
+                border-color: var(--accent-color);
+            }
+
+            select {
+                background-color: var(--bg-secondary);
+                border: 1px solid var(--panel-border);
+                color: var(--text-primary);
+                padding: 6px 8px;
+                border-radius: 4px;
+                width: 100%;
+                font-size: 0.9rem;
+                cursor: pointer;
+            }
+
+            .workspace {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .grid-container {
+                background-color: var(--panel-bg);
+                border-radius: 8px;
+                padding: 20px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex: 1;
+                overflow: auto;
+                position: relative;
+                border: 1px solid var(--panel-border);
+            }
+
+            .grid-wrapper {
+                overflow: auto;
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+            #grid {
+                display: grid;
+                gap: 1px;
+                background-color: var(--grid-border);
+                border: 1px solid var(--grid-border);
+                user-select: none;
+                margin: 0 auto;
+            }
+
+            .cell {
+                width: 25px;
+                height: 25px;
+                background-color: var(--grid-bg);
+                cursor: pointer;
+                transition: background-color 0.1s ease;
+                position: relative;
+            }
+
+            .cell:hover::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                border: 2px solid var(--accent-color);
+                opacity: 0.5;
+                pointer-events: none;
+            }
+
+            .output-container {
+                background-color: var(--panel-bg);
+                border-radius: 8px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                border: 1px solid var(--panel-border);
+                min-height: 150px;
+            }
+
+            .output-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            #output {
+                width: 100%;
+                height: 100px;
+                background-color: var(--bg-secondary);
+                border: 1px solid var(--panel-border);
+                border-radius: 4px;
+                color: var(--text-primary);
+                padding: 10px;
+                font-family: monospace;
+                resize: vertical;
+            }
+
+            .tools-row {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .slider-container {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                width: 100%;
+            }
+
+            .slider-label {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.8rem;
+            }
+
+            input[type="range"] {
+                width: 100%;
+                height: 6px;
+                -webkit-appearance: none;
+                background-color: var(--slider-bg);
+                border-radius: 3px;
+                outline: none;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 16px;
+                height: 16px;
+                background-color: var(--accent-color);
+                border-radius: 50%;
+                cursor: pointer;
+            }
+
+            .tooltip {
+                position: relative;
+                display: inline-block;
+            }
+
+            .tooltip .tooltip-text {
+                visibility: hidden;
+                width: 120px;
+                background-color: var(--bg-secondary);
+                color: var(--text-primary);
+                text-align: center;
+                border-radius: 4px;
+                padding: 5px;
+                position: absolute;
+                z-index: 1;
+                bottom: 125%;
+                left: 50%;
+                margin-left: -60px;
+                opacity: 0;
+                transition: opacity 0.2s;
+                font-size: 0.8rem;
+                pointer-events: none;
+            }
+
+            .tooltip:hover .tooltip-text {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: var(--modal-bg);
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .modal-content {
+                background-color: var(--panel-bg);
+                border-radius: 8px;
+                padding: 20px;
+                width: 400px;
+                max-width: 90%;
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .modal-title {
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+
+            .close-modal {
+                background: none;
+                border: none;
+                color: var(--text-secondary);
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 24px;
+                height: 24px;
+            }
+
+            .close-modal:hover {
+                color: var(--text-primary);
+            }
+
+            .keyboard-shortcuts {
+                margin-top: 10px;
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+            }
+
+            .shortcut {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+
+            .key {
+                background-color: var(--button-bg);
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-family: monospace;
+            }
+
+            .notification {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                background-color: var(--success);
+                color: white;
+                border-radius: 4px;
+                display: none;
+                animation: fadeIn 0.3s, fadeOut 0.3s 1.7s;
+                z-index: 1000;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                }
+                to {
+                    opacity: 0;
+                }
+            }
+
+            .import-container {
+                margin-top: 10px;
+                display: flex;
+                gap: 10px;
+            }
+
+            .import-container input {
+                flex: 1;
+            }
+
+            .editor-tools {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+                flex-wrap: wrap;
+            }
+
+            .tool-icon {
+                font-size: 18px;
+                line-height: 1;
+            }
+
+            /* Custom tool icons */
+            .icon-brush {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                background: linear-gradient(to bottom right, transparent 40%, var(--text-primary) 40%, var(--text-primary) 60%, transparent 60%);
+                position: relative;
+            }
+
+            .icon-brush::before {
+                content: "";
+                position: absolute;
+                width: 8px;
+                height: 12px;
+                background-color: var(--text-primary);
+                transform: rotate(45deg);
+                top: -2px;
+                left: 10px;
+            }
+
+            .icon-bucket {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 2px solid var(--text-primary);
+                border-top: none;
+                position: relative;
+                transform: rotate(-10deg);
+            }
+
+            .icon-bucket::before {
+                content: "";
+                position: absolute;
+                width: 6px;
+                height: 6px;
+                background-color: var(--text-primary);
+                border-radius: 50%;
+                bottom: -2px;
+                left: 2px;
+            }
+
+            .icon-bucket::after {
+                content: "";
+                position: absolute;
+                width: 8px;
+                height: 2px;
+                background-color: var(--text-primary);
+                top: -4px;
+                left: 4px;
+            }
+
+            .icon-line {
+                display: inline-block;
+                width: 20px;
+                height: 2px;
+                background-color: var(--text-primary);
+                transform: rotate(45deg);
+                position: relative;
+            }
+
+            .icon-eraser {
+                display: inline-block;
+                width: 20px;
+                height: 16px;
+                background-color: var(--text-primary);
+                border-radius: 2px;
+                position: relative;
+                transform: rotate(15deg);
+            }
+
+            .icon-eraser::before {
+                content: "";
+                position: absolute;
+                width: 6px;
+                height: 10px;
+                background-color: var(--button-bg);
+                top: 3px;
+                left: 3px;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .container {
+                    height: auto;
+                }
+
+                .workspace {
+                    height: auto;
+                }
+
+                .grid-container {
+                    height: 50vh;
+                }
+            }
+            ::-webkit-scrollbar {
+                width: 10px;
+                height: 10px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: var(--bg-secondary);
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background-color: var(--slider-bg);
+                border-radius: 5px;
+                border: 2px solid var(--bg-secondary);
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: var(--accent-color);
+            }
+
+            /* Firefox */
+            * {
+                scrollbar-width: thin;
+                scrollbar-color: var(--slider-bg) var(--bg-secondary);
+            }
+            .cell.pop {
+                animation: pop 0.2s ease;
+            }
+
+            @keyframes pop {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.3);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+            .icon-circle {
+                font-size: 16px;
+                color: var(--text-primary);
+                line-height: 1;
+            }
+            .cell.preview {
+                opacity: 0.6;
+                outline: 1px dashed var(--accent-color);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div>
+                    <h1 class="title">Pixel to ANSI Studio</h1>
+                    <p class="subheading">Create pixel art and export to ANSI</p>
+                </div>
             </div>
-        </div>
-        
-        <div class="main-content">
-            <div class="toolbox">
-                <div class="toolbox-section">
-                    <div class="toolbox-section-title">Canvas Size</div>
-                    <div class="control-group">
-                        <label>Width
-                            <input type="number" id="width" value="16" min="1" max="64">
-                        </label>
-                        <label>Height
-                            <input type="number" id="height" value="16" min="1" max="64">
-                        </label>
+
+            <div class="main-content">
+                <div class="toolbox">
+                    <div class="toolbox-section">
+                        <div class="toolbox-section-title">Tools</div>
+                        <div class="editor-tools">
+                            <button id="brush-tool" class="tool-button active" title="Brush Tool (B)">
+                                <span class="icon-brush"></span>
+                            </button>
+                            <button id="bucket-tool" class="tool-button" title="Paint Bucket (F)">
+                                <span class="icon-bucket"></span>
+                            </button>
+                            <button id="line-tool" class="tool-button" title="Line Tool (L)">
+                                <span class="icon-line"></span>
+                            </button>
+                            <button id="eraser-tool" class="tool-button" title="Eraser (E)">
+                                <span class="icon-eraser"></span>
+                            </button>
+                            <button id="circle-tool" class="tool-button" title="Circle Tool (O)">
+                                <span class="icon-circle">◯</span>
+                            </button>
+                        </div>
                     </div>
-                    <button id="resize" class="primary">Apply Size</button>
-                </div>
-                
-                <div class="toolbox-section">
-                    <div class="toolbox-section-title">Colors</div>
-                    <div class="color-palette">
-                        <div class="color-option selected" data-color="1" style="background-color: orange;"></div>
-                        <div class="color-option" data-color="2" style="background-color: white;"></div>
-                        <div class="color-option" data-color="3" style="background-color: black;"></div>
-                        <div class="color-option" data-color="0" style="background-color: #252525;"></div>
-                    </div>
-                </div>
-                
-                <div class="toolbox-section">
-                    <div class="toolbox-section-title">Tools</div>
-                    <div class="control-group-stacked">
+
+                    <div class="toolbox-section">
+                        <div class="toolbox-section-title">Canvas Size</div>
                         <div class="control-group">
-                            <button id="undo" title="Undo">↩️ Undo</button>
-                            <button id="redo" title="Redo">↪️ Redo</button>
+                            <label>
+                                Width
+                                <input type="number" id="width" value="16" min="1" max="64" />
+                            </label>
+                            <label>
+                                Height
+                                <input type="number" id="height" value="16" min="1" max="64" />
+                            </label>
                         </div>
-                        <button id="clear">Clear Canvas</button>
-                        <button id="copy-output">Copy ANSI Code</button>
+                        <button id="resize" class="primary">Apply Size</button>
                     </div>
-                </div>
-                
-                <div class="toolbox-section">
-                    <div class="toolbox-section-title">Settings</div>
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Pixel Size</span>
-                            <span id="pixel-size-value">25px</span>
+
+                    <div class="toolbox-section">
+                        <div class="toolbox-section-title">Colors</div>
+                        <div class="color-palette">
+                            <div class="color-option selected" data-color="1" style="background-color: #cb4b16;"></div>
+                            <div class="color-option" data-color="2" style="background-color: #fdf6e3;"></div>
+                            <div class="color-option" data-color="3" style="background-color: #282939;"></div>
+                            <div class="color-option" data-color="4" style="background-color: #7074c4;"></div>
+                            <div class="color-option" data-color="5" style="background-color: #043030;"></div>
                         </div>
-                        <input type="range" id="pixel-size" min="10" max="40" value="25">
+                    </div>
+
+                    <div class="toolbox-section">
+                        <div class="toolbox-section-title">Actions</div>
+                        <div class="control-group-stacked">
+                            <div class="control-group">
+                                <button id="undo" title="Undo (Ctrl+Z)">↩️ Undo</button>
+                                <button id="redo" title="Redo (Ctrl+Y)">↪️ Redo</button>
+                            </div>
+                            <button id="clear">Clear Canvas</button>
+                        </div>
+                    </div>
+
+                    <div class="toolbox-section">
+                        <div class="toolbox-section-title">Import/Export</div>
+                        <div class="control-group-stacked">
+                            <button id="copy-output">Copy ANSI Code</button>
+                            <div class="import-container">
+                                <input type="text" id="import-code" placeholder="Paste ANSI code..." />
+                                <button id="import-button">Import</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="toolbox-section">
+                        <div class="toolbox-section-title">Settings</div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Pixel Size</span>
+                                <span id="pixel-size-value">39px</span>
+                            </div>
+                            <input type="range" id="pixel-size" min="10" max="40" value="39" />
+                        </div>
+                    </div>
+
+                    <div class="toolbox-section">
+                        <div class="toolbox-section-title">Keyboard Shortcuts</div>
+                        <div class="keyboard-shortcuts">
+                            <div class="shortcut">
+                                <span>Brush Tool</span>
+                                <span class="key">B</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Bucket Tool</span>
+                                <span class="key">F</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Line Tool</span>
+                                <span class="key">L</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Eraser</span>
+                                <span class="key">E</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Clear</span>
+                                <span class="key">C</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Undo</span>
+                                <span class="key">Ctrl+Z</span>
+                            </div>
+                            <div class="shortcut">
+                                <span>Redo</span>
+                                <span class="key">Ctrl+Y</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="toolbox-section">
-                    <div class="toolbox-section-title">Keyboard Shortcuts</div>
-                    <div class="keyboard-shortcuts">
-                        <div class="shortcut">
-                            <span>Draw</span>
-                            <span class="key">Mouse</span>
-                        </div>
-                        <div class="shortcut">
-                            <span>Clear</span>
-                            <span class="key">C</span>
-                        </div>
-                        <div class="shortcut">
-                            <span>Copy Code</span>
-                            <span class="key">Ctrl+C</span>
+                <div class="workspace">
+                    <div class="grid-container">
+                        <div class="grid-wrapper">
+                            <div id="grid"></div>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="workspace">
-                <div class="grid-container">
-                    <div class="grid-wrapper">
-                        <div id="grid"></div>
-                    </div>
-                </div>
-                
-                <div class="output-container">
-                    <div class="output-header">
-                        <div class="toolbox-section-title">ANSI Output</div>
-                        <div class="tooltip">
-                            <button id="help-button" class="icon-button">?</button>
-                            <span class="tooltip-text">ANSI code generated from your pixel art</span>
+
+                    <div class="output-container">
+                        <div class="output-header">
+                            <div class="toolbox-section-title">ANSI Output</div>
+                            <div class="tooltip">
+                                <button id="help-button" class="icon-button">?</button>
+                                <span class="tooltip-text">ANSI code generated from your pixel art</span>
+                            </div>
                         </div>
+                        <textarea id="output" readonly placeholder="Your ANSI code will appear here"></textarea>
                     </div>
-                    <textarea id="output" readonly placeholder="Your ANSI code will appear here"></textarea>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div id="help-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">About ANSI Codes</h3>
-                <button class="close-modal">&times;</button>
+
+        <div id="help-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">About ANSI Codes</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <p>The output code represents your pixel art in ANSI format:</p>
+                <ul style="margin-left: 20px; margin-top: 10px; margin-bottom: 10px;">
+                    <li><strong>.</strong> - Background (empty)</li>
+                    <li><strong>O</strong> - Orange pixel</li>
+                    <li><strong>w</strong> - White pixel</li>
+                    <li><strong>B</strong> - Black pixel</li>
+                    <li><strong>p</strong> - Purple pixel</li>
+                    <li><strong>g</strong> - Green pixel</li>
+                </ul>
+                <p>You can copy this code and use it in terminal applications or other systems that support ANSI formatting.</p>
+                <p>To import ANSI code, paste it in the input field and click "Import". The code should only contain the characters above.</p>
             </div>
-            <p>The output code represents your pixel art in ANSI format:</p>
-            <ul style="margin-left: 20px; margin-top: 10px; margin-bottom: 10px;">
-                <li><strong>B</strong> - Background (empty)</li>
-                <li><strong>O</strong> - Orange pixel</li>
-                <li><strong>w</strong> - White pixel</li>
-                <li><strong>B</strong> - Black pixel</li>
-                <li><strong>n</strong> - New line</li>
-            </ul>
-            <p>You can copy this code and use it in terminal applications or other systems that support ANSI formatting.</p>
         </div>
-    </div>
-    
-    <div class="footer">
-        Pixel to ANSI Studio &copy; 2025 • Created with ♥
-    </div>
-    
-    <script>
-    // Configuration
-    const palette = ['#252525', 'orange', 'white', 'black'];
-    const codes = ['B', 'O', 'w', 'B'];
-    let cols = 16;
-    let rows = 16;
-    let drawing = false;
-    let colorIndex = 1;
-    let pixelSize = 25;
-    
-    // Undo/Redo history
-    const maxHistory = 50;
-    let history = [];
-    let historyIndex = -1;
-    let isPainting = false;
-    let initialPaintState = [];
-    
-    // DOM Elements
-    const gridEl = document.getElementById('grid');
-    const outEl = document.getElementById('output');
-    const pw = document.getElementById('width');
-    const ph = document.getElementById('height');
-    const pixelSizeEl = document.getElementById('pixel-size');
-    const pixelSizeValueEl = document.getElementById('pixel-size-value');
-    const helpModal = document.getElementById('help-modal');
-    
-    // Event Listeners
-    document.querySelectorAll('.color-option').forEach(option => {
-        option.addEventListener('click', () => {
-            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-            option.classList.add('selected');
-            colorIndex = +option.dataset.color;
-        });
-    });
-    
-    document.getElementById('clear').addEventListener('click', clear);
-    document.getElementById('resize').addEventListener('click', () => {
-        const newWidth = +pw.value || 1;
-        const newHeight = +ph.value || 1;
-        
-        cols = Math.min(Math.max(newWidth, 1), 64);
-        rows = Math.min(Math.max(newHeight, 1), 64);
-        
-        pw.value = cols;
-        ph.value = rows;
-        
-        initGrid();
-        saveStateToHistory(getGridState());
-    });
-    
-    document.getElementById('copy-output').addEventListener('click', () => {
-        outEl.select();
-        document.execCommand('copy');
-        const originalText = document.getElementById('copy-output').textContent;
-        document.getElementById('copy-output').textContent = 'Copied!';
-        setTimeout(() => {
-            document.getElementById('copy-output').textContent = originalText;
-        }, 1500);
-    });
-    
-    pixelSizeEl.addEventListener('input', (e) => {
-        pixelSize = +e.target.value;
-        pixelSizeValueEl.textContent = `${pixelSize}px`;
-        updateGridCellSize();
-    });
-    
-    document.getElementById('help-button').addEventListener('click', () => {
-        helpModal.style.display = 'flex';
-    });
-    
-    document.querySelector('.close-modal').addEventListener('click', () => {
-        helpModal.style.display = 'none';
-    });
-    
-    window.addEventListener('click', (e) => {
-        if (e.target === helpModal) {
-            helpModal.style.display = 'none';
-        }
-    });
-    
-    // Undo/Redo Event Listeners
-    document.getElementById('undo').addEventListener('click', undo);
-    document.getElementById('redo').addEventListener('click', redo);
-    
-    document.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'c' && !e.ctrlKey) {
-            clear();
-        }
-        if (e.key.toLowerCase() === 'c' && e.ctrlKey && document.activeElement !== outEl) {
-            e.preventDefault();
-            document.getElementById('copy-output').click();
-        }
-        if (e.key.toLowerCase() === 'z' && e.ctrlKey) {
-            e.preventDefault();
-            undo();
-        }
-        if ((e.key.toLowerCase() === 'y' && e.ctrlKey) || 
-            (e.key.toLowerCase() === 'z' && e.ctrlKey && e.shiftKey)) {
-            e.preventDefault();
-            redo();
-        }
-    });
-    
-    // Grid Painting State Tracking
-    gridEl.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('cell')) {
-            isPainting = true;
-            initialPaintState = getGridState();
-        }
-    });
-    
-    document.body.addEventListener('mouseup', () => {
-        if (isPainting) {
-            isPainting = false;
-            const finalPaintState = getGridState();
-            if (JSON.stringify(initialPaintState) !== JSON.stringify(finalPaintState)) {
-                saveStateToHistory(finalPaintState);
+
+        <div id="notification" class="notification">Copied to clipboard!</div>
+
+        <script>
+            // Configuration
+            const palette = ["#121212", "#cb4b16", "#fdf6e3", "#282939", '#7074c4', '#043030'];
+            const codes = [".", "O", "w", "B", 'p', 'g'];
+            let cols = 14;
+            let rows = 14;
+            let drawing = false;
+            let colorIndex = 1;
+            let pixelSize = 39;
+            let currentTool = "brush";
+            let circleRadius = 5;
+            let circlePreviewCells = [];
+            let circlePreviewActive = false;
+
+            // Line tool variables
+            let lineStart = null;
+            let isDrawingLine = false;
+            let previewCells = [];
+
+            // Undo/Redo history
+            const maxHistory = 50;
+            let history = [];
+            let historyIndex = -1;
+            let isPainting = false;
+            let initialPaintState = [];
+
+            // DOM Elements
+            const gridEl = document.getElementById("grid");
+            const outEl = document.getElementById("output");
+            const pw = document.getElementById("width");
+            const ph = document.getElementById("height");
+            const pixelSizeEl = document.getElementById("pixel-size");
+            const pixelSizeValueEl = document.getElementById("pixel-size-value");
+            const helpModal = document.getElementById("help-modal");
+            const notification = document.getElementById("notification");
+
+            // Tool buttons
+            const brushTool = document.getElementById("brush-tool");
+            const bucketTool = document.getElementById("bucket-tool");
+            const lineTool = document.getElementById("line-tool");
+            const eraserTool = document.getElementById("eraser-tool");
+            const circleTool = document.getElementById("circle-tool");
+            let lastHoveredCircleCell = null;
+
+            document.addEventListener(
+                "wheel",
+                (e) => {
+                    if (currentTool === "circle") {
+                        e.preventDefault();
+                        circleRadius += e.deltaY < 0 ? 1 : -1;
+                        circleRadius = Math.max(1, circleRadius);
+                        if (circlePreviewActive && lastHoveredCircleCell) {
+                            showCirclePreview(lastHoveredCircleCell);
+                        }
+                    }
+                },
+                { passive: false }
+            );
+
+            // Set active tool
+            function setActiveTool(tool) {
+                currentTool = tool;
+
+                // Remove active class from all tools
+                [brushTool, bucketTool, lineTool, eraserTool, circleTool].forEach((button) => {
+                    button.classList.remove("active");
+                });
+
+                // Add active class to selected tool
+                switch (tool) {
+                    case "brush":
+                        brushTool.classList.add("active");
+                        break;
+                    case "bucket":
+                        bucketTool.classList.add("active");
+                        break;
+                    case "line":
+                        lineTool.classList.add("active");
+                        break;
+                    case "eraser":
+                        eraserTool.classList.add("active");
+                        break;
+                    case "circle":
+                        circleTool.classList.add("active");
+                        break;
+                }
             }
-        }
-    });
-    
-    // Functions
-    function getGridState() {
-        return Array.from(document.querySelectorAll('.cell')).map(cell => cell.dataset.val);
-    }
-    
-    function saveStateToHistory(state) {
-        if (historyIndex < history.length - 1) {
-            history = history.slice(0, historyIndex + 1);
-        }
-        history.push(state);
-        historyIndex++;
-        if (history.length > maxHistory) {
-            history.shift();
-            historyIndex--;
-        }
-    }
-    
-    function applyState(state) {
-        const cells = document.querySelectorAll('.cell');
-        cells.forEach((cell, index) => {
-            const val = state[index];
-            cell.dataset.val = val;
-            cell.style.backgroundColor = palette[val];
-        });
-        generate();
-    }
-    
-    function undo() {
-        if (historyIndex > 0) {
-            historyIndex--;
-            applyState(history[historyIndex]);
-        }
-    }
-    
-    function redo() {
-        if (historyIndex < history.length - 1) {
-            historyIndex++;
-            applyState(history[historyIndex]);
-        }
-    }
-    
-    function initGrid() {
-        gridEl.innerHTML = '';
-        gridEl.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
-        gridEl.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
-        
-        for (let y = 0; y < rows; y++) {
-            for (let x = 0; x < cols; x++) {
-                const c = document.createElement('div');
-                c.classList.add('cell');
-                c.dataset.x = x;
-                c.dataset.y = y;
-                c.dataset.val = 0;
-                c.style.width = `${pixelSize}px`;
-                c.style.height = `${pixelSize}px`;
-                c.style.backgroundColor = palette[0];
-                
-                c.addEventListener('mousedown', paint);
-                c.addEventListener('mouseover', e => drawing && paint(e));
-                
-                gridEl.append(c);
+            gridEl.addEventListener("mousemove", (e) => {
+                if (currentTool === "circle" && e.target.classList.contains("cell")) {
+                    circlePreviewActive = true;
+                    lastHoveredCircleCell = e.target;
+                    showCirclePreview(lastHoveredCircleCell);
+                }
+            });
+
+            function clearCirclePreview() {
+                for (const cell of circlePreviewCells) {
+                    cell.classList.remove("preview");
+                    paintCell(cell, +cell.dataset.val); // restore original color
+                }
+                circlePreviewCells = [];
             }
-        }
-        
-        generate();
-    }
-    
-    function updateGridCellSize() {
-        gridEl.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
-        gridEl.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
-        document.querySelectorAll('.cell').forEach(c => {
-            c.style.width = `${pixelSize}px`;
-            c.style.height = `${pixelSize}px`;
-        });
-    }
-    
-    function paint(e) {
-        const c = e.currentTarget;
-        c.dataset.val = colorIndex;
-        c.style.backgroundColor = palette[colorIndex];
-        generate();
-    }
-    
-    function clear() {
-        document.querySelectorAll('.cell').forEach(c => {
-            c.dataset.val = 0;
-            c.style.backgroundColor = palette[0];
-        });
-        generate();
-    }
-    
-    function generate() {
-        let s = '';
-        const cells = Array.from(document.querySelectorAll('.cell'));
-        for (let y = 0; y < rows; y++) {
-            for (let x = 0; x < cols; x++) {
-                const c = cells[y * cols + x];
-                s += codes[+c.dataset.val];
+
+            function showCirclePreview(targetCell) {
+                clearCirclePreview();
+
+                const index = Array.from(document.querySelectorAll(".cell")).indexOf(targetCell);
+                const cx = index % cols;
+                const cy = Math.floor(index / cols);
+                const cells = document.querySelectorAll(".cell");
+
+                let x = circleRadius;
+                let y = 0;
+                let decision = 1 - x;
+
+                function plot(x, y) {
+                    const points = [
+                        [cx + x, cy + y],
+                        [cx - x, cy + y],
+                        [cx + x, cy - y],
+                        [cx - x, cy - y],
+                        [cx + y, cy + x],
+                        [cx - y, cy + x],
+                        [cx + y, cy - x],
+                        [cx - y, cy - x],
+                    ];
+
+                    for (const [px, py] of points) {
+                        if (px >= 0 && px < cols && py >= 0 && py < rows) {
+                            const i = py * cols + px;
+                            const cell = cells[i];
+                            if (cell) {
+                                cell.style.backgroundColor = palette[colorIndex];
+                                cell.classList.add("preview");
+                                circlePreviewCells.push(cell);
+                            }
+                        }
+                    }
+                }
+
+                while (x >= y) {
+                    plot(x, y);
+                    y++;
+                    if (decision <= 0) {
+                        decision += 2 * y + 1;
+                    } else {
+                        x--;
+                        decision += 2 * (y - x) + 1;
+                    }
+                }
             }
-            if (y < rows - 1) s += 'n';
-        }
-        outEl.value = s;
-    }
-    
-    // Global mouse events
-    document.body.addEventListener('mousedown', () => drawing = true);
-    document.body.addEventListener('mouseup', () => drawing = false);
-    document.body.addEventListener('mouseleave', () => drawing = false);
-    
-    // Initialize the grid and history
-    initGrid();
-    saveStateToHistory(getGridState());
-</script>
-</body>
+
+            // Event Listeners for tools
+            brushTool.addEventListener("click", () => setActiveTool("brush"));
+            bucketTool.addEventListener("click", () => setActiveTool("bucket"));
+            lineTool.addEventListener("click", () => setActiveTool("line"));
+            eraserTool.addEventListener("click", () => setActiveTool("eraser"));
+            circleTool.addEventListener("click", () => setActiveTool("circle"));
+            function drawCircle(cx, cy, radius) {
+                const cells = document.querySelectorAll(".cell");
+                let x = radius;
+                let y = 0;
+                let decision = 1 - x;
+
+                function plot(x, y) {
+                    const plotPoints = [
+                        [cx + x, cy + y],
+                        [cx - x, cy + y],
+                        [cx + x, cy - y],
+                        [cx - x, cy - y],
+                        [cx + y, cy + x],
+                        [cx - y, cy + x],
+                        [cx + y, cy - x],
+                        [cx - y, cy - x],
+                    ];
+
+                    for (const [px, py] of plotPoints) {
+                        if (px >= 0 && px < cols && py >= 0 && py < rows) {
+                            const index = py * cols + px;
+                            paintCell(cells[index], colorIndex, true);
+                        }
+                    }
+                }
+
+                while (x >= y) {
+                    plot(x, y);
+                    y++;
+                    if (decision <= 0) {
+                        decision += 2 * y + 1;
+                    } else {
+                        x--;
+                        decision += 2 * (y - x) + 1;
+                    }
+                }
+                generate();
+                saveStateToHistory(getGridState());
+            }
+
+            // Event Listeners for colors
+            document.querySelectorAll(".color-option").forEach((option) => {
+                option.addEventListener("click", () => {
+                    document.querySelectorAll(".color-option").forEach((o) => o.classList.remove("selected"));
+                    option.classList.add("selected");
+                    colorIndex = +option.dataset.color;
+                });
+            });
+
+            function paintCell(cell, val, animate = false) {
+                cell.dataset.val = val;
+                cell.style.backgroundColor = palette[val];
+                if (animate) {
+                    cell.classList.remove("pop");
+                    void cell.offsetWidth;
+                    cell.classList.add("pop");
+                }
+            }
+
+            // Grid Painting State Tracking
+            gridEl.addEventListener("mouseover", (e) => {
+                if (isPainting && e.target.classList.contains("cell")) {
+                    const val = +e.target.dataset.val || 0;
+                    const newVal = currentTool === "eraser" ? 0 : colorIndex;
+                    if (val !== newVal) {
+                        paintCell(e.target, newVal, true);
+                        generate();
+                    }
+                }
+            });
+
+            gridEl.addEventListener("mouseleave", () => {
+                clearCirclePreview();
+                circlePreviewActive = false;
+                lastHoveredCircleCell = null;
+            });
+
+            gridEl.addEventListener("mousedown", (e) => {
+                if (currentTool === "circle") {
+                    const index = Array.from(document.querySelectorAll(".cell")).indexOf(e.target);
+                    const cx = index % cols;
+                    const cy = Math.floor(index / cols);
+                    clearCirclePreview();
+                    drawCircle(cx, cy, circleRadius);
+                }
+
+                if (e.target.classList.contains("cell")) {
+                    if (currentTool === "line") {
+                        isDrawingLine = true;
+                        const cellIndex = Array.from(document.querySelectorAll(".cell")).indexOf(e.target);
+                        lineStart = {
+                            x: cellIndex % cols,
+                            y: Math.floor(cellIndex / cols),
+                            element: e.target,
+                        };
+                    } else {
+                        isPainting = true;
+                        initialPaintState = getGridState();
+
+                        if (currentTool === "bucket") {
+                            fillBucket(e.target);
+                        } else {
+                            // Handle brush and eraser
+                            if (currentTool === "eraser") {
+                                e.target.dataset.val = 0;
+                                e.target.style.backgroundColor = palette[0];
+                            } else {
+                                paintCell(e.target, colorIndex, true);
+                            }
+                            generate();
+                        }
+                    }
+                }
+            });
+
+            // Handle line drawing mousemove
+            document.addEventListener("mousemove", (e) => {
+                if (isDrawingLine && lineStart) {
+                    const cell = document.elementFromPoint(e.clientX, e.clientY);
+                    if (cell && cell.classList.contains("cell")) {
+                        // Clear previous preview
+                        clearLinePreview();
+
+                        const cellIndex = Array.from(document.querySelectorAll(".cell")).indexOf(cell);
+                        const x2 = cellIndex % cols;
+                        const y2 = Math.floor(cellIndex / cols);
+
+                        // Draw preview line
+                        drawLine(lineStart.x, lineStart.y, x2, y2, true);
+                    }
+                }
+            });
+
+            document.body.addEventListener("mouseup", () => {
+                if (isDrawingLine && lineStart) {
+                    previewCells.forEach((cell) => {
+                        paintCell(cell, colorIndex, true);
+                        cell.classList.remove("preview");
+                    });
+                    isDrawingLine = false;
+                    lineStart = null;
+                    previewCells = [];
+                    generate();
+                    saveStateToHistory(getGridState());
+                } else if (isPainting) {
+                    isPainting = false;
+                    const currentState = getGridState();
+                    if (JSON.stringify(initialPaintState) !== JSON.stringify(currentState)) {
+                        saveStateToHistory(currentState);
+                    }
+                }
+            });
+            document.addEventListener("keydown", (e) => {
+                if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+                else if (e.ctrlKey && e.key === "c") {
+                    e.preventDefault();
+                    outEl.select();
+                    document.execCommand("copy");
+                    notification.style.display = "block";
+                    setTimeout(() => (notification.style.display = "none"), 2000);
+                    return;
+                }
+
+                if (e.ctrlKey && e.key === "z") {
+                    e.preventDefault();
+                    document.getElementById("undo").click();
+                } else if (e.ctrlKey && e.key === "y") {
+                    e.preventDefault();
+                    document.getElementById("redo").click();
+                } else {
+                    switch (e.key.toLowerCase()) {
+                        case "b":
+                            setActiveTool("brush");
+                            break;
+                        case "f":
+                            setActiveTool("bucket");
+                            break;
+                        case "l":
+                            setActiveTool("line");
+                            break;
+                        case "e":
+                            setActiveTool("eraser");
+                            break;
+                        case "c":
+                            document.getElementById("clear").click();
+                            break;
+                    }
+                }
+            });
+
+            // Functions for line tool
+            function clearLinePreview() {
+                previewCells.forEach((cell) => {
+                    paintCell(cell, cell.dataset.val);
+                    cell.classList.remove("preview");
+                });
+                previewCells = [];
+            }
+
+            // Bresenham's line algorithm for drawing straight lines
+            function drawLine(x1, y1, x2, y2, isPreview = false) {
+                const cells = document.querySelectorAll(".cell");
+                const dx = Math.abs(x2 - x1);
+                const dy = Math.abs(y2 - y1);
+                const sx = x1 < x2 ? 1 : -1;
+                const sy = y1 < y2 ? 1 : -1;
+                let err = dx - dy;
+                while (true) {
+                    if (x1 >= 0 && x1 < cols && y1 >= 0 && y1 < rows) {
+                        const index = y1 * cols + x1;
+                        const cell = cells[index];
+                        if (isPreview) {
+                            cell.style.backgroundColor = palette[colorIndex];
+                            cell.classList.add("preview");
+                            previewCells.push(cell);
+                        } else {
+                            paintCell(cell, colorIndex, true);
+                        }
+                    }
+
+                    if (x1 === x2 && y1 === y2) break;
+
+                    const e2 = 2 * err;
+                    if (e2 > -dy) {
+                        err -= dy;
+                        x1 += sx;
+                    }
+                    if (e2 < dx) {
+                        err += dx;
+                        y1 += sy;
+                    }
+                }
+            }
+
+            function getGridState() {
+                return Array.from(document.querySelectorAll(".cell")).map((cell) => +cell.dataset.val || 0);
+            }
+
+            function setGridState(state) {
+                const cells = document.querySelectorAll(".cell");
+                cells.forEach((cell, i) => {
+                    const val = state[i];
+                    paintCell(cell, val);
+                });
+            }
+
+            function saveStateToHistory(state) {
+                history = history.slice(0, historyIndex + 1);
+                history.push(state);
+                if (history.length > maxHistory) {
+                    history.shift();
+                } else {
+                    historyIndex = history.length - 1;
+                }
+            }
+
+            document.getElementById("undo").addEventListener("click", () => {
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    setGridState(history[historyIndex]);
+                    generate();
+                }
+            });
+
+            document.getElementById("redo").addEventListener("click", () => {
+                if (historyIndex < history.length - 1) {
+                    historyIndex++;
+                    setGridState(history[historyIndex]);
+                    generate();
+                }
+            });
+
+            document.getElementById("clear").addEventListener("click", () => {
+                const state = Array(cols * rows).fill(0);
+                setGridState(state);
+                generate();
+                saveStateToHistory(state);
+            });
+
+            function fillBucket(target) {
+                const cells = document.querySelectorAll(".cell");
+                const index = Array.from(cells).indexOf(target);
+                const targetVal = +target.dataset.val || 0;
+                const newVal = colorIndex;
+
+                if (targetVal === newVal) return;
+
+                const queue = [index];
+                const visited = new Set();
+
+                while (queue.length) {
+                    const i = queue.shift();
+                    if (visited.has(i)) continue;
+                    visited.add(i);
+
+                    const val = +cells[i].dataset.val || 0;
+                    if (val !== targetVal) continue;
+
+                    paintCell(cells[i], newVal, true);
+
+                    const x = i % cols;
+                    const y = Math.floor(i / cols);
+
+                    if (x > 0) queue.push(i - 1);
+                    if (x < cols - 1) queue.push(i + 1);
+                    if (y > 0) queue.push(i - cols);
+                    if (y < rows - 1) queue.push(i + cols);
+                }
+
+                generate();
+                saveStateToHistory(getGridState());
+            }
+
+            function generate() {
+                const cells = document.querySelectorAll(".cell");
+                let output = "";
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const i = y * cols + x;
+                        const val = +cells[i].dataset.val || 0;
+                        output += codes[val] || "B";
+                    }
+                    output += "n";
+                }
+                outEl.value = output;
+            }
+
+            document.getElementById("resize").addEventListener("click", () => {
+                cols = Math.min(Math.max(+pw.value, 1), 64);
+                rows = Math.min(Math.max(+ph.value, 1), 64);
+                buildGrid();
+                generate();
+                saveStateToHistory(getGridState());
+            });
+
+            function buildGrid() {
+                gridEl.innerHTML = "";
+                gridEl.style.gridTemplateColumns = `repeat(${cols}, ${pixelSize}px)`;
+                gridEl.style.gridTemplateRows = `repeat(${rows}, ${pixelSize}px)`;
+
+                for (let i = 0; i < cols * rows; i++) {
+                    const cell = document.createElement("div");
+                    cell.className = "cell";
+                    paintCell(cell, 0);
+                    cell.style.width = pixelSize + "px";
+                    cell.style.height = pixelSize + "px";
+                    gridEl.appendChild(cell);
+                }
+            }
+
+            pixelSizeEl.addEventListener("input", () => {
+                pixelSize = +pixelSizeEl.value;
+                pixelSizeValueEl.textContent = pixelSize + "px";
+                buildGrid();
+                setGridState(getGridState());
+            });
+
+            document.getElementById("copy-output").addEventListener("click", () => {
+                outEl.select();
+                document.execCommand("copy");
+                notification.style.display = "block";
+                setTimeout(() => (notification.style.display = "none"), 2000);
+            });
+
+            document.getElementById("import-button").addEventListener("click", () => {
+                const code = document.getElementById("import-code").value.trim();
+                if (!code) return;
+
+                const lines = code.split("n");
+                const newRows = lines.length;
+                const newCols = lines[0].length;
+                if (!lines.every((line) => line.length === newCols)) return;
+
+                const flat = lines
+                    .join("")
+                    .split("")
+                    .map((ch) => codes.indexOf(ch));
+                if (flat.includes(-1)) return;
+
+                rows = newRows;
+                cols = newCols;
+                pw.value = cols;
+                ph.value = rows;
+
+                buildGrid();
+                setGridState(flat);
+                generate();
+                saveStateToHistory(flat);
+            });
+
+            document.getElementById("help-button").addEventListener("click", () => {
+                helpModal.style.display = "flex";
+            });
+
+            document.querySelector(".close-modal").addEventListener("click", () => {
+                helpModal.style.display = "none";
+            });
+
+            buildGrid();
+            saveStateToHistory(getGridState());
+        </script>
+    </body>
 </html>
