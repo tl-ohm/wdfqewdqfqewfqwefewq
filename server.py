@@ -54,7 +54,7 @@ def email():
         requests.post(DISCORD_WEBHOOK_URL, data=DATA)
         return render_template("messagepage.html", message="Sent request succesfully. We will get back to you as soon as possible.")
     
-    return render_template('email.html')
+    return redirect(url_for('LandingPage'))
 
 
 @app.route('/protected')
