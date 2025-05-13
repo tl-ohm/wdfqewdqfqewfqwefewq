@@ -16,13 +16,11 @@
             --hover-color: #cccccc;
             --glow-color: rgba(255, 255, 255, 0.05);
         }
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-color);
@@ -39,7 +37,6 @@
             justify-content: center;
             overflow-x: hidden;
         }
-        
         .noise {
             position: fixed;
             top: 0;
@@ -51,7 +48,6 @@
             z-index: -1;
             pointer-events: none;
         }
-        
         .container {
             width: 100%;
             max-width: 1200px;
@@ -60,7 +56,6 @@
             text-align: center;
             z-index: 1;
         }
-        
         .header {
             padding: 60px 40px;
             border-radius: 20px;
@@ -71,7 +66,6 @@
             margin-left: auto;
             margin-right: auto;
         }
-        
         h1 {
             font-size: 6rem;
             font-weight: 700;
@@ -85,7 +79,6 @@
             position: relative;
             display: inline-block;
         }
-        
         h1::after {
             content: '';
             position: absolute;
@@ -95,10 +88,10 @@
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
         }
-        
         .status {
-            display: inline-block;
-            margin-top: 20px;
+            display: block;
+            margin: 20px auto 0;
+            width: max-content;
             padding: 10px 30px;
             border-radius: 30px;
             background-color: rgba(20, 20, 25, 0.7);
@@ -112,13 +105,11 @@
             backdrop-filter: blur(5px);
             transition: all 0.3s ease;
         }
-        
         .status:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             border-color: rgba(255, 255, 255, 0.2);
         }
-        
         .status::before {
             content: "●";
             color: #4CAF50;
@@ -126,7 +117,6 @@
             display: inline-block;
             animation: pulse 2s infinite;
         }
-        
         .links-section {
             display: flex;
             justify-content: center;
@@ -134,7 +124,6 @@
             margin-top: 40px;
             flex-wrap: wrap;
         }
-        
         .link-item {
             padding: 15px 25px;
             border-radius: 12px;
@@ -144,32 +133,26 @@
             cursor: pointer;
             backdrop-filter: blur(5px);
         }
-        
         .link-item:hover {
             transform: translateY(-5px);
             border-color: rgba(255, 255, 255, 0.2);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
-        
         .link-item h3 {
             font-size: 1.2rem;
             margin-bottom: 8px;
             color: rgba(255, 255, 255, 0.9);
         }
-        
         .link-item p {
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.6);
         }
-        
         .footer {
             margin-top: 80px;
             margin-bottom: 30px;
             font-size: 0.9rem;
             color: rgba(240, 240, 240, 0.5);
         }
-        
-        /* Modal styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -184,7 +167,6 @@
             z-index: 1000;
             animation: fadeIn 0.3s ease;
         }
-        
         .modal-content {
             background: var(--secondary-color);
             padding: 2rem;
@@ -196,23 +178,19 @@
             opacity: 0;
             transition: all 0.3s ease;
         }
-        
         .modal-overlay.show {
             display: flex;
         }
-        
         .modal-overlay.show .modal-content {
             transform: translateY(0);
             opacity: 1;
         }
-        
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
         }
-        
         .modal-title {
             font-size: 1.5rem;
             font-weight: 600;
@@ -221,7 +199,6 @@
             background-clip: text;
             color: transparent;
         }
-        
         .close-btn {
             background: none;
             border: none;
@@ -231,18 +208,15 @@
             padding: 0 8px;
             transition: all 0.3s ease;
         }
-        
         .close-btn:hover {
             color: var(--accent-color);
         }
-        
         .modal-body {
             font-size: 1.1rem;
             color: rgba(240, 240, 240, 0.8);
             text-align: center;
             padding: 1.5rem 0;
         }
-        
         @keyframes pulse {
             0% {
                 opacity: 0.5;
@@ -257,28 +231,23 @@
                 transform: scale(0.95);
             }
         }
-        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
         @media (max-width: 768px) {
             h1 {
                 font-size: 4rem;
             }
-            
             .links-section {
                 flex-direction: column;
                 align-items: center;
                 gap: 15px;
             }
-            
             .link-item {
                 width: 100%;
                 max-width: 300px;
             }
-            
             .header {
                 padding: 40px 20px;
             }
@@ -292,19 +261,16 @@
             <h1>olyium</h1>
             <div class="status">Always Online</div>
         </div>
-        
         <div class="links-section">
             <div class="link-item" onclick="showServicesModal()">
                 <h3>Services</h3>
                 <p>View our services.</p>
             </div>
         </div>
-        
         <div class="footer">
             © 2025 olyium | NO RIGHTS RESERVED
         </div>
     </div>
-    
     <div class="modal-overlay" id="servicesModal" onclick="closeModal(event)">
         <div class="modal-content">
             <div class="modal-header">
@@ -316,21 +282,15 @@
             </div>
         </div>
     </div>
-
     <script>
         function showServicesModal() {
-            const modal = document.getElementById('servicesModal');
-            modal.classList.add('show');
+            document.getElementById('servicesModal').classList.add('show');
         }
-
         function closeModal(event) {
-            if (!event || event.target.classList.contains('modal-overlay') || 
-                event.target.classList.contains('close-btn')) {
-                const modal = document.getElementById('servicesModal');
-                modal.classList.remove('show');
+            if (!event || event.target.classList.contains('modal-overlay') || event.target.classList.contains('close-btn')) {
+                document.getElementById('servicesModal').classList.remove('show');
             }
         }
-        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeModal();
