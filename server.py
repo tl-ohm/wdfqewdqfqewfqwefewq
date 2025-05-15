@@ -3,6 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, jsonify, a
 import requests
 
 app = Flask(__name__, template_folder="client/templates", static_folder="client/static")
+app.config['SERVER_NAME'] = 'olyium.com' 
 
 maintenance_mode = False
 
@@ -11,6 +12,10 @@ def check_maintenance():
         return 'olyium is 100% down rn. (jokeing ts is still up)'
     return None
 
+@app.route('/', subdomain='games')
+def dqwdq_index():
+    return render_template('games_landingpage.html')
+    
 @app.route('/', methods=['POST', 'GET'])
 def LandingPage():
 
