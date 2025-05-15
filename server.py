@@ -30,6 +30,13 @@ def mines():
         return maintenance_message
     return render_template('mines.html')
 
+@app.route('/games', methods=['POST', 'GET'])
+def mines():
+    maintenance_message = check_maintenance()
+    if maintenance_message:
+        return maintenance_message
+    return render_template('games_landingpage.html')
+    
 @app.route('/protected')
 def Protected():
     referer = request.headers.get("Referer")
