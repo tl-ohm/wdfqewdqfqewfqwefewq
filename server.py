@@ -37,8 +37,8 @@ def ansi():
     
     return render_template('ansi.html')
 
-@app.route('/email', methods=['POST', 'GET'])
-def email():
+@app.route('/mines', methods=['POST', 'GET'])
+def mines():
 
     maintenance_message = check_maintenance()
     
@@ -47,14 +47,9 @@ def email():
 
     if request.method == "POST":
         
-        DATA = {
-            'content': f"""Requester: {request.form.get('email')}\nWants: {request.form.get('suc')}\nWants To Pay: {request.form.get('bid')}"""
-        }
-        DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1371613773986529340/sFeR8_iVLvfqmPJCQzV2DfeB4vT_uQPGU3-fXi4g3KoGqB5j1MDFo8jaeR5Gv-KcQf50"
-        requests.post(DISCORD_WEBHOOK_URL, data=DATA)
-        return render_template("messagepage.html", message="Sent request succesfully. We will get back to you as soon as possible.")
-    
-    return redirect(url_for('LandingPage'))
+        return 'fuck you nigga'
+        
+    return redirect('mines.html')
 
 
 @app.route('/protected')
