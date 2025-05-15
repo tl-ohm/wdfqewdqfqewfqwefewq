@@ -1,7 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 
 app = Flask(__name__, template_folder="client/templates", static_folder="client/static")
-app.config['SERVER_NAME'] = '.olyium.com'
 
 maintenance_mode = False
 
@@ -9,10 +8,6 @@ def check_maintenance():
     if maintenance_mode:
         return 'olyium is under maintenance.'
     return None
-
-@app.route('/', subdomain='games')
-def dqwdq_index():
-    return render_template('games_landingpage.html')
 
 @app.route('/', methods=['POST', 'GET'])
 def LandingPage():
