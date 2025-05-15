@@ -49,7 +49,7 @@ def mines():
         
         return 'fuck you nigga'
         
-    return redirect('mines.html')
+    return render_template('mines.html')
 
 
 @app.route('/protected')
