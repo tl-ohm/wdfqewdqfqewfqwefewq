@@ -31,7 +31,7 @@ def mines():
     return render_template('mines.html')
 
 @app.route('/games', methods=['POST', 'GET'])
-def mines():
+def games():
     maintenance_message = check_maintenance()
     if maintenance_message:
         return maintenance_message
