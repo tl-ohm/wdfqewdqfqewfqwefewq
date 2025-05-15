@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, jsonify, a
 import requests
 
 app = Flask(__name__, template_folder="client/templates", static_folder="client/static")
-app.config['SERVER_NAME'] = 'olyium.com' 
+app.config['SERVER_NAME'] = '.olyium.com'
 
 maintenance_mode = False
 
