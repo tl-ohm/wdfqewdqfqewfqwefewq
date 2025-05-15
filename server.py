@@ -35,7 +35,7 @@ def games():
     maintenance_message = check_maintenance()
     if maintenance_message:
         return maintenance_message
-    return render_template('games_landingpage.html')
+    return render_template('game_landingpage.html')
     
 @app.route('/protected')
 def Protected():
