@@ -3,29 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
     <title>Olyium</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     <style>
+        :root {
+            --primary-color: #e0e0e0;
+            --primary-glow: rgba(255, 255, 255, 0.6);
+            --secondary-color: #2ecc71;
+            --secondary-glow: rgba(46, 204, 113, 0.6);
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-radius: 6px;
+            --neon-color: #2ecc71;
+            --neon-glow: rgba(46, 204, 113, 0.8);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
         }
-        
+
         body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: #ffffff;
-            overflow: hidden;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a1a2e 0%, var(--bg-dark) 70%);
             position: relative;
+            overflow: hidden;
         }
-        
-        /* Animated background particles */
+
+        /* Subtle background effect */
         body::before {
             content: '';
             position: absolute;
@@ -33,71 +48,106 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
-            pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, rgba(46, 204, 113, 0.03) 0%, transparent 70%);
+            animation: pulse 8s infinite alternate;
+            z-index: -1;
         }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.1); }
         }
-        
+
         .container {
-            text-align: center;
-            z-index: 1;
+            max-width: 600px;
+            width: 100%;
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
             position: relative;
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            padding: 60px 40px;
         }
-        
-        h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
+
+        /* Subtle neon border effect */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius);
+            background: transparent;
+            box-shadow: 0 0 10px var(--neon-glow);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius);
+            background: transparent;
+            border: 1px solid var(--neon-color);
+            box-shadow: 0 0 5px var(--neon-glow), inset 0 0 5px var(--neon-glow);
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .logo {
+            font-size: clamp(3rem, 8vw, 4.5rem);
             font-weight: 700;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.02em;
-            animation: glow 3s ease-in-out infinite alternate;
+            letter-spacing: 3px;
+            text-transform: lowercase;
+            position: relative;
         }
-        
-        @keyframes glow {
-            from {
-                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5));
-            }
-            to {
-                filter: drop-shadow(0 0 30px rgba(118, 75, 162, 0.8));
-            }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-color), transparent);
+            box-shadow: 0 0 10px var(--neon-glow);
         }
-        
-        p {
-            font-size: clamp(1rem, 3vw, 1.25rem);
+
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.2rem);
             font-weight: 300;
-            color: #b8b8d1;
-            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
             line-height: 1.6;
             margin-top: 1rem;
             opacity: 0.9;
         }
-        
-        /* Subtle animation for the subtitle */
-        p {
-            animation: fadeInUp 1s ease-out 0.5s both;
+
+        /* Subtle animations */
+        .container {
+            animation: fadeInUp 1s ease-out;
         }
-        
-        h1 {
-            animation: fadeInUp 1s ease-out both, glow 3s ease-in-out infinite alternate;
+
+        .logo {
+            animation: fadeInUp 1s ease-out 0.2s both;
         }
-        
+
+        .subtitle {
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -108,63 +158,95 @@
                 transform: translateY(0);
             }
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
-                margin: 1rem;
-                padding: 1.5rem;
+                margin: 20px;
+                padding: 40px 30px;
             }
             
-            h1 {
-                margin-bottom: 1rem;
+            .logo {
+                margin-bottom: 1.5rem;
+                letter-spacing: 2px;
             }
         }
-        
-        /* Additional floating elements */
-        .floating-element {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            animation: floatRandom 15s infinite linear;
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .logo {
+                letter-spacing: 1px;
+            }
         }
-        
-        .floating-element:nth-child(1) {
+
+        /* Subtle floating particles */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(46, 204, 113, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .particle:nth-child(1) {
             top: 20%;
             left: 10%;
             animation-delay: 0s;
+            animation-duration: 25s;
         }
-        
-        .floating-element:nth-child(2) {
+
+        .particle:nth-child(2) {
             top: 60%;
             right: 15%;
-            animation-delay: 5s;
+            animation-delay: 8s;
+            animation-duration: 30s;
         }
-        
-        .floating-element:nth-child(3) {
+
+        .particle:nth-child(3) {
             bottom: 30%;
             left: 20%;
-            animation-delay: 10s;
+            animation-delay: 15s;
+            animation-duration: 20s;
         }
-        
-        @keyframes floatRandom {
-            0% { transform: translateY(0px) translateX(0px); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
+
+        .particle:nth-child(4) {
+            top: 40%;
+            right: 30%;
+            animation-delay: 5s;
+            animation-duration: 35s;
+        }
+
+        @keyframes float {
+            0% { 
+                transform: translateY(0px) translateX(0px); 
+                opacity: 0; 
+            }
+            10% { 
+                opacity: 0.3; 
+            }
+            90% { 
+                opacity: 0.3; 
+            }
+            100% { 
+                transform: translateY(-100vh) translateX(50px); 
+                opacity: 0; 
+            }
         }
     </style>
 </head>
 <body>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
     
     <div class="container">
-        <h1>olyium</h1>
-        <p>Uncensored AI access, coming soon.</p>
+        <h1 class="logo">olyium</h1>
+        <p class="subtitle">Uncensored AI access, coming soon.</p>
     </div>
 </body>
 </html>
